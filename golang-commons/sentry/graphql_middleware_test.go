@@ -68,11 +68,13 @@ func TestGraphQLErrorPresenter(t *testing.T) {
 	ctx := pmcontext.AddTenantToContext(context.Background(), "test")
 
 	//When
-	err := presenter(ctx, testError)
+	result := presenter(ctx, testError)
 
 	//Then
-	expectedErr := gqlerror.Wrap(testError)
-	assert.Equal(t, expectedErr, err)
+	assert.Equal(t, "test error", result.Message)
+	assert.Equal(t, "test error", result.Extensions["technicalError"])
+	assert.Nil(t, result.Extensions["userError"])
+	assert.Nil(t, result.Extensions["code"])
 }
 
 func TestGraphQLErrorPresenterNilError(t *testing.T) {
@@ -94,11 +96,11 @@ func TestGraphQLErrorPresenterWithoutTenantContext(t *testing.T) {
 	ctx := context.Background()
 
 	//When
-	err := presenter(ctx, testError)
+	result := presenter(ctx, testError)
 
 	//Then
-	expectedErr := gqlerror.Wrap(testError)
-	assert.Equal(t, expectedErr, err)
+	assert.Equal(t, "test error", result.Message)
+	assert.Empty(t, result.Extensions)
 }
 
 func TestGraphQLErrorPresenterWithSkipTenants(t *testing.T) {
@@ -110,11 +112,11 @@ func TestGraphQLErrorPresenterWithSkipTenants(t *testing.T) {
 	ctx = logger.SetLoggerInContext(ctx, tl.Logger)
 
 	//When
-	err := presenter(ctx, testError)
+	result := presenter(ctx, testError)
 
 	//Then
-	expectedErr := gqlerror.Wrap(testError)
-	assert.Equal(t, expectedErr, err)
+	assert.Equal(t, "test error", result.Message)
+	assert.Empty(t, result.Extensions)
 
 	messages, err2 := tl.GetLogMessages()
 	assert.NoError(t, err2)

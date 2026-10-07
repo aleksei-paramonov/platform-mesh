@@ -64,6 +64,12 @@ func GraphQLErrorPresenter(skipTenants ...string) graphql.ErrorPresenterFunc {
 			}
 			event = event.Bool("isTechnicalIssuer", isTechnicalIssuer)
 			event.Msg("Error not sent to Sentry")
+
+			if err.Extensions == nil {
+				err.Extensions = map[string]any{}
+			}
+			err.Extensions["technicalError"] = e.Error()
+
 			return err
 		}
 
